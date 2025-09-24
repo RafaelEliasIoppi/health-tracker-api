@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rafael.healthtracker.model.Sono;
 import com.rafael.healthtracker.repository.SonoRepository;
+import com.rafael.healthtracker.service.AlertaService;
 
 /**
  * Controller REST para operações com registros de sono.
@@ -26,6 +27,9 @@ public class SonoController {
 
     @Autowired
     private SonoRepository sonoRepository;
+
+    @Autowired
+    private AlertaService alertaService;
 
     /**
      * Lista todos os registros de sono.
@@ -51,6 +55,7 @@ public class SonoController {
     @PostMapping
     public ResponseEntity<Sono> criar(@RequestBody Sono sono) {
         Sono salvo = sonoRepository.save(sono);
+        alertaService.verificarAlertas(salvo.getUsuario().getId()); // Chamada ao serviço de alerta
         return ResponseEntity.ok(salvo);
     }
 

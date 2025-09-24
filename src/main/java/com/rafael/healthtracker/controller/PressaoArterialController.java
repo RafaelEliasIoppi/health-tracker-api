@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rafael.healthtracker.model.PressaoArterial;
 import com.rafael.healthtracker.repository.PressaoArterialRepository;
+import com.rafael.healthtracker.service.AlertaService;
 
 /**
  * Controller REST para operações com registros de pressão arterial.
@@ -26,6 +27,9 @@ public class PressaoArterialController {
 
     @Autowired
     private PressaoArterialRepository pressaoRepository;
+
+    @Autowired
+    private AlertaService alertaService;
 
     /**
      * Lista todos os registros de pressão arterial.
@@ -51,6 +55,7 @@ public class PressaoArterialController {
     @PostMapping
     public ResponseEntity<PressaoArterial> criar(@RequestBody PressaoArterial pressao) {
         PressaoArterial salvo = pressaoRepository.save(pressao);
+        alertaService.verificarAlertas(salvo.getUsuario().getId()); // Chamada ao serviço de alerta
         return ResponseEntity.ok(salvo);
     }
 

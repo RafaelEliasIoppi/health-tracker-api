@@ -1,9 +1,7 @@
 package com.rafael.healthtracker.controller;
-
-
-
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,8 +12,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.rafael.healthtracker.model.Glicemia;
 import com.rafael.healthtracker.repository.GlicemiaRepository;
+import com.rafael.healthtracker.service.AlertaService;
 
 /**
  * Controller REST para operações com registros de glicemia.
@@ -26,6 +26,9 @@ public class GlicemiaController {
 
     @Autowired
     private GlicemiaRepository glicemiaRepository;
+
+    @Autowired
+    private AlertaService alertaService;
 
     /**
      * Lista todos os registros de glicemia.
@@ -51,6 +54,7 @@ public class GlicemiaController {
     @PostMapping
     public ResponseEntity<Glicemia> criar(@RequestBody Glicemia glicemia) {
         Glicemia salvo = glicemiaRepository.save(glicemia);
+        alertaService.verificarAlertas(salvo.getUsuario().getId()); // Chamada ao serviço de alerta
         return ResponseEntity.ok(salvo);
     }
 
