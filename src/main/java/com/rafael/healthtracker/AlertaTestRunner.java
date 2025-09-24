@@ -10,7 +10,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import com.rafael.healthtracker.model.Alerta;
+import com.rafael.healthtracker.model.Glicemia;
 import com.rafael.healthtracker.model.PressaoArterial;
+import com.rafael.healthtracker.model.Sono;
 import com.rafael.healthtracker.model.Usuario;
 import com.rafael.healthtracker.repository.AlertaRepository;
 import com.rafael.healthtracker.repository.GlicemiaRepository;
@@ -36,14 +38,23 @@ public class AlertaTestRunner {
         return args -> {
             // Criar usuário
             Usuario usuario = new Usuario();
-            usuario.setNome("Rafael");
+            usuario.setNome("Rafael de Oliveira");
+            usuario.setEmail("rafael@example.com");
             usuario = usuarioRepo.save(usuario);
             Long usuarioId = usuario.getId();
 
+         pressaoRepo.save(new PressaoArterial(150, 95, LocalDateTime.now(), usuario));
+         pressaoRepo.save(new PressaoArterial(145, 92, LocalDateTime.now().minusDays(1), usuario));
+         pressaoRepo.save(new PressaoArterial(160, 100, LocalDateTime.now().minusDays(2), usuario));    
+
             // Inserir dados críticos
-           pressaoRepo.save(new PressaoArterial(150, 95, LocalDateTime.now(), usuario));
-           pressaoRepo.save(new PressaoArterial(130, 85, LocalDateTime.now().minusDays(1), usuario));    
-           pressaoRepo.save(new PressaoArterial(145, 92, LocalDateTime.now().minusDays(2), usuario));
+           glicemiaRepo.save(new Glicemia(250, LocalDateTime.now(), usuario));
+           glicemiaRepo.save(new Glicemia(180, LocalDateTime.now().minusDays(1), usuario));
+           glicemiaRepo.save(new Glicemia(220, LocalDateTime.now().minusDays(2), usuario));
+
+           sonoRepo.save(new Sono(LocalDateTime.now().minusDays(1).withHour(23).withMinute(0), LocalDateTime.now().minusDays(1).withHour(7).withMinute(0), 4, usuario));
+           sonoRepo.save(new Sono(LocalDateTime.now().minusDays(2).withHour(22).withMinute(30), LocalDateTime.now().minusDays(2).withHour(7).withMinute(30), 5, usuario));
+           sonoRepo.save(new Sono(LocalDateTime.now().minusDays(3).withHour(0).withMinute(0), LocalDateTime.now().minusDays(3).withHour(3).withMinute(0), 3, usuario));
 
             // Executar verificação
             alertaService.verificarAlertas(usuarioId);
