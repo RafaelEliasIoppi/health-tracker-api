@@ -44,7 +44,7 @@ public class AlertaService {
         verificarSono(usuarioId);
     }
 
-    private void salvarAlerta(String tipo, String mensagem, Long usuarioId) {
+    private void salvarAlerta(String tipo, String mensagem, String nivel, Long usuarioId) {
         Usuario usuario = usuarioRepo.findById(usuarioId).orElse(null);
         if (usuario == null) {
             System.out.println("⚠️ Usuário não encontrado: " + usuarioId);
@@ -54,6 +54,7 @@ public class AlertaService {
         Alerta alerta = new Alerta();
         alerta.setTipo(tipo);
         alerta.setMensagem(mensagem);
+        alerta.setNivel(com.rafael.healthtracker.model.NivelAlerta.valueOf(nivel)); // convert String to NivelAlerta enum
         alerta.setDataHora(LocalDateTime.now());
         alerta.setUsuario(usuario);
 
@@ -63,8 +64,10 @@ public class AlertaService {
     private void verificarPressao(Long usuarioId) {
         List<PressaoArterial> registros = pressaoRepo.findByUsuarioId(usuarioId);
         for (PressaoArterial p : registros) {
-            if (p.getSistolica() >= 140 || p.getDiastolica() >= 90) {
-                salvarAlerta("Pressão", "Pressão arterial elevada em " + p.getDataHora(), usuarioId);
+            if (p.getSistolica() >= 160 || p.getDiastolica() >= 100) {
+                salvarAlerta("Pressão", "Pressão muito alta em " + p.getDataHora(), "CRITICO", usuarioId);
+            } else if (p.getSistolica() >= 140 || p.getDiastolica() >= 90) {
+                salvarAlerta("Pressão", "Pressão elevada em " + p.getDataHora(), "MODERADO", usuarioId);
             }
         }
     }
@@ -72,8 +75,13 @@ public class AlertaService {
     private void verificarGlicemia(Long usuarioId) {
         List<Glicemia> registros = glicemiaRepo.findByUsuarioId(usuarioId);
         for (Glicemia g : registros) {
-            if (g.getNivel() < 70 || g.getNivel() > 180) {
-                salvarAlerta("Glicemia", "Glicemia fora do intervalo saudável em " + g.getDataHora(), usuarioId);
+            double nivel = g.getNivel();
+            if (nivel < 60 || nivel > 250) {
+                salvarAlerta("Glicemia", "Glicemia fora do controle em " + g.getDataHora() + " (valor: " + nivel + ")", "CRITICO", usuarioId);
+            } else if (nivel < 70 || nivel > 180) {
+                salvarAlerta("Glicemia", "Glicemia fora do intervalo saudável em " + g.getDataHora() + " (valor: " + nivel + ")", "MODERADO", usuarioId);
+            } else if (nivel < 90 || nivel > 150) {
+                salvarAlerta("Glicemia", "Glicemia fora do ideal em " + g.getDataHora() + " (valor: " + nivel + ")", "LEVE", usuarioId);
             }
         }
     }
@@ -83,8 +91,14 @@ public class AlertaService {
         for (Sono s : registros) {
             Duration duracao = Duration.between(s.getInicio(), s.getFim());
             long horas = duracao.toHours();
-            if (horas < 6 || s.getQualidade() < 5) {
-                salvarAlerta("Sono", "Sono insuficiente ou de baixa qualidade em " + s.getInicio(), usuarioId);
+            int qualidade = s.getQualidade();
+
+            if (horas < 4 || qualidade <= 2) {
+                salvarAlerta("Sono", "Sono muito insuficiente em " + s.getInicio() + " (" + horas + "h, qualidade " + qualidade + ")", "CRITICO", usuarioId);
+            } else if (horas < 6 || qualidade < 4) {
+                salvarAlerta("Sono", "Sono abaixo do ideal em " + s.getInicio() + " (" + horas + "h, qualidade " + qualidade + ")", "MODERADO", usuarioId);
+            } else if (horas < 7 || qualidade < 5) {
+                salvarAlerta("Sono", "Sono levemente abaixo do ideal em " + s.getInicio() + " (" + horas + "h, qualidade " + qualidade + ")", "LEVE", usuarioId);
             }
         }
     }
