@@ -1,11 +1,11 @@
 package com.rafael.healthtracker.controller;
 
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rafael.healthtracker.model.Usuario;
+import com.rafael.healthtracker.repository.AlertaRepository;
+import com.rafael.healthtracker.repository.GlicemiaRepository;
+import com.rafael.healthtracker.repository.PressaoArterialRepository;
+import com.rafael.healthtracker.repository.SonoRepository;
 import com.rafael.healthtracker.repository.UsuarioRepository;
 
 /**
@@ -27,6 +31,18 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private AlertaRepository alertaRepository;
+
+    @Autowired
+    private GlicemiaRepository glicemiaRepository;
+
+    @Autowired
+    private PressaoArterialRepository pressaoRepository;
+
+    @Autowired
+    private SonoRepository sonoRepository;
 
     /**
      * Lista todos os usuários cadastrados.
@@ -74,13 +90,19 @@ public class UsuarioController {
     }
 
     /**
-     * Remove um usuário pelo ID.
+     * Exclui um usuário e seus dados vinculados.
      */
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         if (!usuarioRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+
+        alertaRepository.deleteByUsuarioId(id);
+        glicemiaRepository.deleteByUsuarioId(id);
+        pressaoRepository.deleteByUsuarioId(id);
+        sonoRepository.deleteByUsuarioId(id);
 
         usuarioRepository.deleteById(id);
         return ResponseEntity.noContent().build();
