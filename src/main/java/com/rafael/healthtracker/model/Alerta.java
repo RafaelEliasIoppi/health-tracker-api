@@ -14,6 +14,10 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Alerta {
 
+    public static NivelAlerta valueOf(String nivel) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.rafael.healthtracker.model.Alerta;
 import com.rafael.healthtracker.model.Glicemia;
+import com.rafael.healthtracker.model.NivelAlerta;
 import com.rafael.healthtracker.model.PressaoArterial;
 import com.rafael.healthtracker.model.Sono;
 import com.rafael.healthtracker.model.Usuario;
@@ -54,7 +55,7 @@ public class AlertaService {
         Alerta alerta = new Alerta();
         alerta.setTipo(tipo);
         alerta.setMensagem(mensagem);
-        alerta.setNivel(com.rafael.healthtracker.model.NivelAlerta.valueOf(nivel)); // convert String to NivelAlerta enum
+        alerta.setNivel(NivelAlerta.valueOf(nivel)); //
         alerta.setDataHora(LocalDateTime.now());
         alerta.setUsuario(usuario);
 
